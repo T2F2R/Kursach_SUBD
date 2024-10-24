@@ -119,7 +119,7 @@
             // 
             this.button4.Location = new System.Drawing.Point(747, 268);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(131, 54);
+            this.button4.Size = new System.Drawing.Size(131, 69);
             this.button4.TabIndex = 7;
             this.button4.Text = "Статистика вызовов охраны";
             this.button4.UseVisualStyleBackColor = true;
