@@ -28,81 +28,98 @@ namespace Kursach_SUBD
 
         private void LoadEmployeeData()
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            DataSet dataset = new DataSet();
-            conn.Open();
-            NpgsqlCommand command = new NpgsqlCommand("SELECT * FROM employees", conn);
-            NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
-            da.Fill(dataset, "employee_table");
-            dataGridViewEmployees.DataSource = dataset;
-            dataGridViewEmployees.DataMember = "employee_table";
-            conn.Close();
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+            {
+                try
+                {
+                    DataSet dataset = new DataSet();
+                    conn.Open();
+                    NpgsqlCommand command = new NpgsqlCommand("SELECT * FROM employees", conn);
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
+                    da.Fill(dataset, "employee_table");
+                    dataGridViewEmployees.DataSource = dataset;
+                    dataGridViewEmployees.DataMember = "employee_table";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки данных сотрудников: " + ex.Message);
+                }
+            }
         }
 
         private void LoadContractData()
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            DataSet dataset = new DataSet();
-            conn.Open();
-            NpgsqlCommand command = new NpgsqlCommand("SELECT * FROM contracts", conn);
-            NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
-            da.Fill(dataset, "contract_table");
-            dataGridViewContracts.DataSource = dataset;
-            dataGridViewContracts.DataMember = "contract_table";
-            conn.Close();
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+            {
+                try
+                {
+                    DataSet dataset = new DataSet();
+                    conn.Open();
+                    NpgsqlCommand command = new NpgsqlCommand("SELECT * FROM contracts", conn);
+                    NpgsqlDataAdapter da = new NpgsqlDataAdapter(command);
+                    da.Fill(dataset, "contract_table");
+                    dataGridViewContracts.DataSource = dataset;
+                    dataGridViewContracts.DataMember = "contract_table";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки данных по договорам: " + ex.Message);
+                }
+            }
         }
 
-        // Загрузка списка клиентов
         private void LoadClients()
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
-
-            // SQL-запрос для получения списка клиентов
-            string query = "SELECT client_id, client_type, address representative_name, phone_number, account_number, service_type FROM clients ORDER BY representative_name";
-
-            NpgsqlCommand command = new NpgsqlCommand(query, conn);
-            NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
-
-            // Набор данных для отображения клиентов
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet, "clients");
-
-            // Привязка данных к DataGridView
-            dataGridViewClients.DataSource = dataSet;
-            dataGridViewClients.DataMember = "clients";
-
-            conn.Close();
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT client_id, client_type, address, representative_name, phone_number, account_number, service_type FROM clients ORDER BY representative_name";
+                    NpgsqlCommand command = new NpgsqlCommand(query, conn);
+                    NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet, "clients");
+                    dataGridViewClients.DataSource = dataSet;
+                    dataGridViewClients.DataMember = "clients";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки данных клиентов: " + ex.Message);
+                }
+            }
         }
 
-        // Загрузка списка услуг
         private void LoadServices()
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
-
-            // SQL-запрос для получения списка услуг
-            string query = "SELECT service_id, service_name, service_cost FROM services ORDER BY service_name";
-
-            NpgsqlCommand command = new NpgsqlCommand(query, conn);
-            NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
-
-            // Набор данных для отображения услуг
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet, "services");
-
-            // Привязка данных к DataGridView
-            dataGridViewServices.DataSource = dataSet;
-            dataGridViewServices.DataMember = "services";
-
-            conn.Close();
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT service_id, service_name, service_cost FROM services ORDER BY service_name";
+                    NpgsqlCommand command = new NpgsqlCommand(query, conn);
+                    NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
+                    DataSet dataSet = new DataSet();
+                    adapter.Fill(dataSet, "services");
+                    dataGridViewServices.DataSource = dataSet;
+                    dataGridViewServices.DataMember = "services";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки данных услуг: " + ex.Message);
+                }
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             InsertFormContract form = new InsertFormContract();
             form.ShowDialog();
+            LoadEmployeeData();
             LoadContractData();
+            LoadClients();
+            LoadServices();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -110,69 +127,80 @@ namespace Kursach_SUBD
             InsertFormEmployee form = new InsertFormEmployee();
             form.ShowDialog();
             LoadEmployeeData();
+            LoadContractData();
+            LoadClients();
+            LoadServices();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            // Вывод статистики по договорам
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
-            NpgsqlCommand command = new NpgsqlCommand("SELECT COUNT(contract_id), SUM(revenue) FROM contracts", conn);
-            NpgsqlDataReader reader = command.ExecuteReader();
-
-            if (reader.Read())
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
             {
-                MessageBox.Show($"Всего договоров: {reader[0]}, Общая выручка: {reader[1]} руб.");
+                try
+                {
+                    conn.Open();
+                    NpgsqlCommand command = new NpgsqlCommand("SELECT COUNT(contract_id), SUM(revenue) FROM contracts", conn);
+                    NpgsqlDataReader reader = command.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        MessageBox.Show($"Всего договоров: {reader[0]}, Общая выручка: {reader[1]} руб.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка при получении статистики по договорам: " + ex.Message);
+                }
             }
-            conn.Close();
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
             SecurityCallsStatisticsForm form = new SecurityCallsStatisticsForm();
             form.ShowDialog();
+            LoadEmployeeData();
+            LoadContractData();
+            LoadClients();
+            LoadServices();
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if (dataGridViewEmployees.SelectedRows.Count > 0)
+            if(dataGridViewEmployees.SelectedRows.Count > 0)
             {
-                // Получение выбранного сотрудника
                 int selectedEmployeeId = Convert.ToInt32(dataGridViewEmployees.SelectedRows[0].Cells["employee_id"].Value);
-
-                // Подтверждение удаления
                 DialogResult dialogResult = MessageBox.Show("Вы уверены, что хотите удалить этого сотрудника?", "Подтверждение удаления", MessageBoxButtons.YesNo);
+
                 if (dialogResult == DialogResult.Yes)
                 {
-                    NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-                    conn.Open();
-
-                    // SQL-запрос для удаления сотрудника
-                    string deleteQuery = "DELETE FROM employees WHERE employee_id = @employee_id";
-
-                    NpgsqlCommand command = new NpgsqlCommand(deleteQuery, conn);
-                    command.Parameters.AddWithValue("@employee_id", selectedEmployeeId);
-
-                    try
+                    using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
                     {
-                        command.ExecuteNonQuery();
-                        MessageBox.Show("Сотрудник успешно удален.");
-
-                        // Обновление списка сотрудников после удаления
-                        LoadEmployeeData();
+                        try
+                        {
+                            conn.Open();
+                            string deleteQuery = "DELETE FROM employees WHERE employee_id = @employee_id";
+                            NpgsqlCommand command = new NpgsqlCommand(deleteQuery, conn);
+                            command.Parameters.AddWithValue("@employee_id", selectedEmployeeId);
+                            command.ExecuteNonQuery();
+                            MessageBox.Show("Сотрудник успешно удален.");
+                            LoadEmployeeData();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка при удалении сотрудника: " + ex.Message);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Ошибка при удалении сотрудника: " + ex.Message);
-                    }
-
-                    conn.Close();
                 }
             }
             else
             {
                 MessageBox.Show("Выберите сотрудника для удаления.");
             }
+
+            LoadEmployeeData();
+            LoadContractData();
+            LoadClients();
+            LoadServices();
         }
     }
 }

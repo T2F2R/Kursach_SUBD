@@ -20,64 +20,103 @@ namespace Kursach_SUBD
 
         private void SecurityCallsStatisticsForm_Load(object sender, EventArgs e)
         {
-            LoadStatistics();
+            try
+            {
+                LoadStatistics();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка загрузки данных: " + ex.Message);
+            }
         }
 
         private void LoadStatistics()
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
+            try
+            {
+                using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+                {
+                    conn.Open();
 
-            // SQL-запрос для выборки всех вызовов охраны
-            string query = "SELECT sc.call_id, c.representative_name, sc.call_date, sc.response_time " +
-                           "FROM security_calls sc " +
-                           "JOIN clients c ON sc.client_id = c.client_id " +
-                           "ORDER BY sc.call_date DESC";
+                    string query = "SELECT sc.call_id, c.representative_name, sc.call_date, sc.response_time " +
+                                   "FROM security_calls sc " +
+                                   "JOIN clients c ON sc.client_id = c.client_id " +
+                                   "ORDER BY sc.call_date DESC";
 
-            NpgsqlCommand command = new NpgsqlCommand(query, conn);
-            NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
+                    using (var command = new NpgsqlCommand(query, conn))
+                    using (var adapter = new NpgsqlDataAdapter(command))
+                    {
+                        DataSet dataSet = new DataSet();
+                        adapter.Fill(dataSet, "security_calls");
 
-            // Набор данных для отображения вызовов охраны
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet, "security_calls");
-
-            // Привязка данных к DataGridView
-            dataGridViewSecurityCalls.DataSource = dataSet;
-            dataGridViewSecurityCalls.DataMember = "security_calls";
-
-            conn.Close();
+                        dataGridViewSecurityCalls.DataSource = dataSet;
+                        dataGridViewSecurityCalls.DataMember = "security_calls";
+                    }
+                }
+            }
+            catch (NpgsqlException ex)
+            {
+                MessageBox.Show("Ошибка подключения к базе данных или выполнения SQL-запроса: " + ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Произошла неизвестная ошибка при загрузке данных: " + ex.Message);
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            DateTime startDate = dateTimePickerStart.Value;
-            DateTime endDate = dateTimePickerEnd.Value;
+            try
+            {
+                DateTime startDate = dateTimePickerStart.Value;
+                DateTime endDate = dateTimePickerEnd.Value;
 
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
+                using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+                {
+                    conn.Open();
 
-            // SQL-запрос с фильтрацией по диапазону дат
-            string query = "SELECT sc.call_id, c.representative_name, sc.call_date, sc.response_time " +
-                           "FROM security_calls sc " +
-                           "JOIN clients c ON sc.client_id = c.client_id " +
-                           "WHERE sc.call_date BETWEEN :start_date AND :end_date " +
-                           "ORDER BY sc.call_date DESC";
+                    string query = "SELECT sc.call_id, c.representative_name, sc.call_date, sc.response_time " +
+                                   "FROM security_calls sc " +
+                                   "JOIN clients c ON sc.client_id = c.client_id " +
+                                   "WHERE sc.call_date BETWEEN :start_date AND :end_date " +
+                                   "ORDER BY sc.call_date DESC";
 
-            NpgsqlCommand command = new NpgsqlCommand(query, conn);
-            command.Parameters.Add(new NpgsqlParameter("start_date", DbType.Date));
-            command.Parameters.Add(new NpgsqlParameter("end_date", DbType.Date));
-            command.Parameters[0].Value = startDate;
-            command.Parameters[1].Value = endDate;
+                    using (var command = new NpgsqlCommand(query, conn))
+                    {
+                        command.Parameters.Add(new NpgsqlParameter("start_date", DbType.Date) { Value = startDate });
+                        command.Parameters.Add(new NpgsqlParameter("end_date", DbType.Date) { Value = endDate });
 
-            NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
-            DataSet dataSet = new DataSet();
-            adapter.Fill(dataSet, "security_calls_filtered");
+                        using (var adapter = new NpgsqlDataAdapter(command))
+                        {
+                            DataSet dataSet = new DataSet();
+                            adapter.Fill(dataSet, "security_calls_filtered");
 
-            // Привязка отфильтрованных данных к DataGridView
-            dataGridViewSecurityCalls.DataSource = dataSet;
-            dataGridViewSecurityCalls.DataMember = "security_calls_filtered";
-
-            conn.Close();
+                            dataGridViewSecurityCalls.DataSource = dataSet;
+                            dataGridViewSecurityCalls.DataMember = "security_calls_filtered";
+                        }
+                    }
+                }
+            }
+            catch (NpgsqlException ex)
+            {
+                MessageBox.Show("Ошибка подключения к базе данных или выполнения SQL-запроса: " + ex.Message);
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Ошибка формата данных. Проверьте введенные значения: " + ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Произошла неизвестная ошибка при загрузке данных: " + ex.Message);
+            }
         }
 
         private void label2_Click(object sender, EventArgs e)

@@ -20,60 +20,63 @@ namespace Kursach_SUBD
 
         private void button1_Click(object sender, EventArgs e)
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
+            try
+            {
+                using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+                {
+                    conn.Open();
 
-            // Сначала добавляем информацию о заказчике
-            NpgsqlCommand insertClientCommand = new NpgsqlCommand("INSERT INTO clients (client_type, address, account_number, representative_name, phone_number, service_type) VALUES (:client_type, :address, :account_number, :representative_name, :phone_number, :service_type) RETURNING client_id", conn);
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("client_type", DbType.String));
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("address", DbType.String));
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("account_number", DbType.String));
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_name", DbType.String));
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("phone_number", DbType.String));
-            insertClientCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String));
+                    using (var insertClientCommand = new NpgsqlCommand("INSERT INTO clients (client_type, address, account_number, representative_name, phone_number, service_type) VALUES (:client_type, :address, :account_number, :representative_name, :phone_number, :service_type) RETURNING client_id", conn))
+                    {
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("client_type", DbType.String) { Value = txtClientType.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("address", DbType.String) { Value = txtClientAddress.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("account_number", DbType.String) { Value = txtClientAccountNumber.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_name", DbType.String) { Value = txtClientRepresentative.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("phone_number", DbType.String) { Value = txtClientPhoneNumber.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
 
-            insertClientCommand.Parameters[0].Value = txtClientType.Text;
-            insertClientCommand.Parameters[1].Value = txtClientAddress.Text;
-            insertClientCommand.Parameters[2].Value = txtClientAccountNumber.Text;
-            insertClientCommand.Parameters[3].Value = txtClientRepresentative.Text;
-            insertClientCommand.Parameters[4].Value = txtClientPhoneNumber.Text;
-            insertClientCommand.Parameters[5].Value = txtServiceType.Text;
+                        int clientId = Convert.ToInt32(insertClientCommand.ExecuteScalar());
 
-            // Получаем сгенерированный идентификатор нового клиента
-            int clientId = Convert.ToInt32(insertClientCommand.ExecuteScalar());
+                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_name, service_cost) VALUES (:service_name, :service_cost) RETURNING service_id", conn))
+                        {
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_name", DbType.String) { Value = txtServiceName.Text });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_cost", DbType.Decimal) { Value = Convert.ToDecimal(txtServiceCost.Text) });
 
-            // Далее добавляем информацию об услуге
-            NpgsqlCommand insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_name, service_cost) VALUES (:service_name, :service_cost) RETURNING service_id", conn);
-            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_name", DbType.String));
-            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_cost", DbType.Decimal));
+                            int serviceId = Convert.ToInt32(insertServiceCommand.ExecuteScalar());
 
-            insertServiceCommand.Parameters[0].Value = txtServiceName.Text;
-            insertServiceCommand.Parameters[1].Value = Convert.ToDecimal(txtServiceCost.Text);
+                            using (var insertContractCommand = new NpgsqlCommand("INSERT INTO contracts (client_id, service_id, employee_id, order_date, revenue) VALUES (:client_id, :service_id, :employee_id, :order_date, :revenue)", conn))
+                            {
+                                insertContractCommand.Parameters.Add(new NpgsqlParameter("client_id", DbType.Int32) { Value = clientId });
+                                insertContractCommand.Parameters.Add(new NpgsqlParameter("service_id", DbType.Int32) { Value = serviceId });
+                                insertContractCommand.Parameters.Add(new NpgsqlParameter("employee_id", DbType.Int32) { Value = Convert.ToInt32(txtEmployeeId.Text) });
+                                insertContractCommand.Parameters.Add(new NpgsqlParameter("order_date", DbType.Date) { Value = dateTimePickerOrderDate.Value });
+                                insertContractCommand.Parameters.Add(new NpgsqlParameter("revenue", DbType.Decimal) { Value = Convert.ToDecimal(txtRevenue.Text) });
 
-            // Получаем сгенерированный идентификатор новой услуги
-            int serviceId = Convert.ToInt32(insertServiceCommand.ExecuteScalar());
+                                insertContractCommand.ExecuteNonQuery();
+                                MessageBox.Show("Контракт успешно добавлен.");
+                            }
+                        }
+                    }
+                }
 
-            // Теперь создаем контракт, ссылаясь на нового клиента и услугу
-            NpgsqlCommand insertContractCommand = new NpgsqlCommand("INSERT INTO contracts (client_id, service_id, employee_id, order_date, revenue) VALUES (:client_id, :service_id, :employee_id, :order_date, :revenue)", conn);
-            insertContractCommand.Parameters.Add(new NpgsqlParameter("client_id", DbType.Int32));
-            insertContractCommand.Parameters.Add(new NpgsqlParameter("service_id", DbType.Int32));
-            insertContractCommand.Parameters.Add(new NpgsqlParameter("employee_id", DbType.Int32));
-            insertContractCommand.Parameters.Add(new NpgsqlParameter("order_date", DbType.Date));
-            insertContractCommand.Parameters.Add(new NpgsqlParameter("revenue", DbType.Decimal));
-
-            insertContractCommand.Parameters[0].Value = clientId;
-            insertContractCommand.Parameters[1].Value = serviceId;
-            insertContractCommand.Parameters[2].Value = Convert.ToInt32(txtEmployeeId.Text);
-            insertContractCommand.Parameters[3].Value = dateTimePickerOrderDate.Value;
-            insertContractCommand.Parameters[4].Value = Convert.ToDecimal(txtRevenue.Text);
-
-            insertContractCommand.ExecuteNonQuery();
-
-            // Закрываем соединение
-            conn.Close();
-
-            // Закрываем форму после сохранения данных
-            this.Close();
+                this.Close();
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Ошибка: некорректный формат данных. Проверьте правильность введенных значений. " + ex.Message);
+            }
+            catch (NpgsqlException ex)
+            {
+                MessageBox.Show("Ошибка подключения к базе данных или выполнения команды: " + ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                MessageBox.Show("Ошибка при работе с базой данных: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Произошла неизвестная ошибка: " + ex.Message);
+            }
         }
 
         private void label7_Click(object sender, EventArgs e)

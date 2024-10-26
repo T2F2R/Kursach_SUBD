@@ -23,43 +23,52 @@ namespace Kursach_SUBD
 
         private void button1_Click(object sender, EventArgs e)
         {
-            NpgsqlConnection conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234");
-            conn.Open();
-
-            // SQL-запрос для вставки данных, включая изображение (photo)
-            NpgsqlCommand command = new NpgsqlCommand("INSERT INTO employees (full_name, position, hire_date, salary, education, photo) VALUES (:name, :position, :hire_date, :salary, :education, :photo)", conn);
-
-            // Добавляем параметры с их типами
-            command.Parameters.Add(new NpgsqlParameter("name", DbType.String));
-            command.Parameters.Add(new NpgsqlParameter("position", DbType.String));
-            command.Parameters.Add(new NpgsqlParameter("hire_date", DbType.Date));
-            command.Parameters.Add(new NpgsqlParameter("salary", DbType.Decimal));
-            command.Parameters.Add(new NpgsqlParameter("education", DbType.String));
-            command.Parameters.Add(new NpgsqlParameter("photo", DbType.Binary)); 
-
-            command.Parameters[0].Value = txtName.Text;
-            command.Parameters[1].Value = txtPosition.Text;
-            command.Parameters[2].Value = dateTimePickerHireDate.Value;
-            command.Parameters[3].Value = Convert.ToDecimal(txtSalary.Text);
-            command.Parameters[4].Value = txtEducation.Text;
-
-            if (pictureBox1.Image != null)
+            try
             {
-                using (MemoryStream ms = new MemoryStream())
+                using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
                 {
-                    pictureBox1.Image.Save(ms, pictureBox1.Image.RawFormat);
-                    command.Parameters[5].Value = ms.ToArray();
-                }
-            }
-            else
-            {
-                command.Parameters[5].Value = DBNull.Value;
-            }
-            
-            command.ExecuteNonQuery();
+                    conn.Open();
 
-            conn.Close();
-            this.Close();
+                    using (var command = new NpgsqlCommand("INSERT INTO employees (full_name, position, hire_date, salary, education, photo) VALUES (:name, :position, :hire_date, :salary, :education, :photo)", conn))
+                    {
+                        command.Parameters.Add(new NpgsqlParameter("name", DbType.String) { Value = txtName.Text });
+                        command.Parameters.Add(new NpgsqlParameter("position", DbType.String) { Value = txtPosition.Text });
+                        command.Parameters.Add(new NpgsqlParameter("hire_date", DbType.Date) { Value = dateTimePickerHireDate.Value });
+                        command.Parameters.Add(new NpgsqlParameter("salary", DbType.Decimal) { Value = Convert.ToDecimal(txtSalary.Text) });
+                        command.Parameters.Add(new NpgsqlParameter("education", DbType.String) { Value = txtEducation.Text });
+
+                        if (pictureBox1.Image != null)
+                        {
+                            using (MemoryStream ms = new MemoryStream())
+                            {
+                                pictureBox1.Image.Save(ms, pictureBox1.Image.RawFormat);
+                                command.Parameters.Add(new NpgsqlParameter("photo", DbType.Binary) { Value = ms.ToArray() });
+                            }
+                        }
+                        else
+                        {
+                            command.Parameters.Add(new NpgsqlParameter("photo", DbType.Binary) { Value = DBNull.Value });
+                        }
+
+                        command.ExecuteNonQuery();
+                        MessageBox.Show("Сотрудник успешно добавлен.");
+                    }
+                }
+
+                this.Close();
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show("Ошибка в формате данных: " + ex.Message);
+            }
+            catch (NpgsqlException ex)
+            {
+                MessageBox.Show("Ошибка подключения к базе данных: " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Произошла ошибка: " + ex.Message);
+            }
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -69,14 +78,29 @@ namespace Kursach_SUBD
 
         private void button2_Click(object sender, EventArgs e)
         {
-            openFileDialog1.InitialDirectory = @"C:\";
-            openFileDialog1.Filter = "All EmbroideryFiles | *.bmp; *.gif; *.jpeg; *.jpg; " + "*.fif;*.fiff;*.png;*.wmf;*.emf" + "|Windows Bitmap (*.bmp)|*.bmp" + "|JPEG File Interchange Format (*.jpg)|*.jpg;*.jpeg" + "|Graphics Interchange Format (*.gif)|*.gif" + "|Portable Network Graphics (*.png)|*.png" + "|Tag Embroidery File Format (*.tif)|*.tif;*.tiff";
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            try
             {
-                Image image = Image.FromFile(openFileDialog1.FileName);
-                MemoryStream memoryStream = new MemoryStream();
-                image.Save(memoryStream, ImageFormat.Jpeg);
-                pictureBox1.Image = image;
+                openFileDialog1.InitialDirectory = @"C:\";
+                openFileDialog1.Filter = "All EmbroideryFiles | *.bmp; *.gif; *.jpeg; *.jpg; " +
+                                         "*.fif;*.fiff;*.png;*.wmf;*.emf" +
+                                         "|Windows Bitmap (*.bmp)|*.bmp" +
+                                         "|JPEG File Interchange Format (*.jpg)|*.jpg;*.jpeg" +
+                                         "|Graphics Interchange Format (*.gif)|*.gif" +
+                                         "|Portable Network Graphics (*.png)|*.png" +
+                                         "|Tag Embroidery File Format (*.tif)|*.tif;*.tiff";
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    Image image = Image.FromFile(openFileDialog1.FileName);
+                    pictureBox1.Image = image;
+                }
+            }
+            catch (OutOfMemoryException ex)
+            {
+                MessageBox.Show("Ошибка: выбранный файл не является допустимым изображением. " + ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при загрузке изображения: " + ex.Message);
             }
         }
 
