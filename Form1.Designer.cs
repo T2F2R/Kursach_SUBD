@@ -41,6 +41,9 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewContracts)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewEmployees)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewClients)).BeginInit();
@@ -107,7 +110,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(747, 208);
+            this.button3.Location = new System.Drawing.Point(747, 358);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(131, 54);
             this.button3.TabIndex = 6;
@@ -117,7 +120,7 @@
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(747, 268);
+            this.button4.Location = new System.Drawing.Point(747, 493);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(131, 69);
             this.button4.TabIndex = 7;
@@ -159,9 +162,9 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(373, 381);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 16);
+            this.label4.Size = new System.Drawing.Size(86, 16);
             this.label4.TabIndex = 11;
-            this.label4.Text = "Услуги";
+            this.label4.Text = "Расписание";
             // 
             // button5
             // 
@@ -173,11 +176,44 @@
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(747, 418);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(131, 69);
+            this.button6.TabIndex = 13;
+            this.button6.Text = "Статистика по сотрудникам";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(747, 208);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(131, 69);
+            this.button7.TabIndex = 14;
+            this.button7.Text = "Добавить расписание";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(747, 283);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(131, 69);
+            this.button8.TabIndex = 15;
+            this.button8.Text = "Удалить расписание";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(894, 807);
+            this.ClientSize = new System.Drawing.Size(894, 762);
+            this.Controls.Add(this.button8);
+            this.Controls.Add(this.button7);
+            this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -218,6 +254,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button button8;
     }
 }
 

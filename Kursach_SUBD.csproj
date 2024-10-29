@@ -113,14 +113,14 @@
     <Compile Include="InsertFormEmployee.Designer.cs">
       <DependentUpon>InsertFormEmployee.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SecurityCallsStatisticsForm.cs">
+    <Compile Include="InsertFormSchedule.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SecurityCallsStatisticsForm.Designer.cs">
-      <DependentUpon>SecurityCallsStatisticsForm.cs</DependentUpon>
+    <Compile Include="InsertFormSchedule.Designer.cs">
+      <DependentUpon>InsertFormSchedule.cs</DependentUpon>
     </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -129,6 +129,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="InsertFormEmployee.resx">
       <DependentUpon>InsertFormEmployee.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InsertFormSchedule.resx">
+      <DependentUpon>InsertFormSchedule.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -139,9 +142,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="SecurityCallsStatisticsForm.resx">
-      <DependentUpon>SecurityCallsStatisticsForm.cs</DependentUpon>
-    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

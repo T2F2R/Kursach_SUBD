@@ -26,39 +26,31 @@ namespace Kursach_SUBD
                 {
                     conn.Open();
 
-                    using (var insertClientCommand = new NpgsqlCommand("INSERT INTO clients (client_type, address, account_number, representative_name, phone_number, service_type) VALUES (:client_type, :address, :account_number, :representative_name, :phone_number, :service_type) RETURNING client_id", conn))
+                    using (var insertClientCommand = new NpgsqlCommand("INSERT INTO clients (address, account_number, representative_last_name, representative_first_name, representative_middle_name, phone_number, service_type) VALUES (:address, :account_number, :representative_last_name, :representative_first_name, :representative_middle_name, :phone_number, :service_type) RETURNING client_id", conn))
                     {
-                        insertClientCommand.Parameters.Add(new NpgsqlParameter("client_type", DbType.String) { Value = txtClientType.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("address", DbType.String) { Value = txtClientAddress.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("account_number", DbType.String) { Value = txtClientAccountNumber.Text });
-                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_name", DbType.String) { Value = txtClientRepresentative.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_last_name", DbType.String) { Value = txtClientRepresentative.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_first_name", DbType.String) { Value = textBox1.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_middle_name", DbType.String) { Value = textBox2.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("phone_number", DbType.String) { Value = txtClientPhoneNumber.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
 
                         int clientId = Convert.ToInt32(insertClientCommand.ExecuteScalar());
 
-                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_name, service_cost) VALUES (:service_name, :service_cost) RETURNING service_id", conn))
+                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_type, cost, client_id, order_date, completion_date) VALUES (:service_type, :cost, :client_id, :order_date, :completion_date)", conn))
                         {
-                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_name", DbType.String) { Value = txtServiceName.Text });
-                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_cost", DbType.Decimal) { Value = Convert.ToDecimal(txtServiceCost.Text) });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("cost", DbType.Decimal) { Value = Convert.ToDecimal(txtServiceCost.Text) });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("client_id", DbType.Int32) { Value = clientId });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("order_date", DbType.Date) { Value = dateTimePickerOrderDate.Value });
+                            insertServiceCommand.Parameters.Add(new NpgsqlParameter("completion_date", DbType.Date) { Value = dateTimePicker1.Value });
 
-                            int serviceId = Convert.ToInt32(insertServiceCommand.ExecuteScalar());
-
-                            using (var insertContractCommand = new NpgsqlCommand("INSERT INTO contracts (client_id, service_id, employee_id, order_date, revenue) VALUES (:client_id, :service_id, :employee_id, :order_date, :revenue)", conn))
-                            {
-                                insertContractCommand.Parameters.Add(new NpgsqlParameter("client_id", DbType.Int32) { Value = clientId });
-                                insertContractCommand.Parameters.Add(new NpgsqlParameter("service_id", DbType.Int32) { Value = serviceId });
-                                insertContractCommand.Parameters.Add(new NpgsqlParameter("employee_id", DbType.Int32) { Value = Convert.ToInt32(txtEmployeeId.Text) });
-                                insertContractCommand.Parameters.Add(new NpgsqlParameter("order_date", DbType.Date) { Value = dateTimePickerOrderDate.Value });
-                                insertContractCommand.Parameters.Add(new NpgsqlParameter("revenue", DbType.Decimal) { Value = Convert.ToDecimal(txtRevenue.Text) });
-
-                                insertContractCommand.ExecuteNonQuery();
-                                MessageBox.Show("Контракт успешно добавлен.");
-                            }
+                            insertServiceCommand.ExecuteNonQuery();
+                            MessageBox.Show("Контракт успешно добавлен.");
                         }
                     }
                 }
-
                 this.Close();
             }
             catch (FormatException ex)

@@ -29,13 +29,16 @@ namespace Kursach_SUBD
                 {
                     conn.Open();
 
-                    using (var command = new NpgsqlCommand("INSERT INTO employees (full_name, position, hire_date, salary, education, photo) VALUES (:name, :position, :hire_date, :salary, :education, :photo)", conn))
+                    using (var command = new NpgsqlCommand("INSERT INTO employees (last_name, first_name, middle_name, position, hire_date, salary, education, license_expiration, photo) VALUES (:last_name, :first_name, :middle_name, :position, :hire_date, :salary, :education, :license_expiration, :photo)", conn))
                     {
-                        command.Parameters.Add(new NpgsqlParameter("name", DbType.String) { Value = txtName.Text });
+                        command.Parameters.Add(new NpgsqlParameter("last_name", DbType.String) { Value = txtName.Text });
+                        command.Parameters.Add(new NpgsqlParameter("first_name", DbType.String) { Value = textBox1.Text });
+                        command.Parameters.Add(new NpgsqlParameter("middle_name", DbType.String) { Value = textBox2.Text });
                         command.Parameters.Add(new NpgsqlParameter("position", DbType.String) { Value = txtPosition.Text });
                         command.Parameters.Add(new NpgsqlParameter("hire_date", DbType.Date) { Value = dateTimePickerHireDate.Value });
                         command.Parameters.Add(new NpgsqlParameter("salary", DbType.Decimal) { Value = Convert.ToDecimal(txtSalary.Text) });
                         command.Parameters.Add(new NpgsqlParameter("education", DbType.String) { Value = txtEducation.Text });
+                        command.Parameters.Add(new NpgsqlParameter("license_expiration", DbType.Date) { Value = dateTimePicker1.Value });
 
                         if (pictureBox1.Image != null)
                         {
