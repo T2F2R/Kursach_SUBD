@@ -285,5 +285,51 @@ namespace Kursach_SUBD
                 MessageBox.Show("Выберите расписание для удаления.");
             }
         }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if (dataGridViewContracts.SelectedRows.Count > 0)
+            {
+                int selectedServiceId = Convert.ToInt32(dataGridViewContracts.SelectedRows[0].Cells["service_id"].Value);
+
+                using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+                {
+                    try
+                    {
+                        conn.Open();
+                        string query = @"
+                    SELECT e.employee_id, e.last_name, e.first_name, e.middle_name, e.position 
+                    FROM employees e
+                    INNER JOIN service_employee se ON e.employee_id = se.employee_id
+                    WHERE se.service_id = @service_id";
+
+                        NpgsqlCommand command = new NpgsqlCommand(query, conn);
+                        command.Parameters.AddWithValue("@service_id", selectedServiceId);
+
+                        DataTable employeeTable = new DataTable();
+                        using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
+                        {
+                            adapter.Fill(employeeTable);
+                        }
+
+                        StringBuilder employeeList = new StringBuilder("Сотрудники, связанные с заказом:\n\n");
+                        foreach (DataRow row in employeeTable.Rows)
+                        {
+                            employeeList.AppendLine($"{row["last_name"]} {row["first_name"]} {row["middle_name"]}, {row["position"]}");
+                        }
+
+                        MessageBox.Show(employeeList.ToString(), "Список сотрудников");
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Ошибка при получении списка сотрудников: " + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите заказ для просмотра сотрудников.");
+            }
+        }
     }
 }

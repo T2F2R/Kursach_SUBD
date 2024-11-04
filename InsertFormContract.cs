@@ -16,6 +16,29 @@ namespace Kursach_SUBD
         public InsertFormContract()
         {
             InitializeComponent();
+            LoadEmployees();
+        }
+
+        private void LoadEmployees()
+        {
+            using (var conn = new NpgsqlConnection("server=localhost; database=Kursach_SUBD; user Id=postgres; password=1234"))
+            {
+                try
+                {
+                    conn.Open();
+                    string query = "SELECT employee_id, last_name || ' ' || first_name AS full_name FROM employees";
+                    NpgsqlCommand command = new NpgsqlCommand(query, conn);
+                    NpgsqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        checkedListBox1.Items.Add(new { Text = reader["full_name"].ToString(), Value = reader["employee_id"] });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки сотрудников: " + ex.Message);
+                }
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -26,6 +49,7 @@ namespace Kursach_SUBD
                 {
                     conn.Open();
 
+                    // Создание клиента
                     using (var insertClientCommand = new NpgsqlCommand("INSERT INTO clients (address, account_number, representative_last_name, representative_first_name, representative_middle_name, phone_number, service_type) VALUES (:address, :account_number, :representative_last_name, :representative_first_name, :representative_middle_name, :phone_number, :service_type) RETURNING client_id", conn))
                     {
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("address", DbType.String) { Value = txtClientAddress.Text });
@@ -38,7 +62,8 @@ namespace Kursach_SUBD
 
                         int clientId = Convert.ToInt32(insertClientCommand.ExecuteScalar());
 
-                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_type, cost, client_id, order_date, completion_date) VALUES (:service_type, :cost, :client_id, :order_date, :completion_date)", conn))
+                        // Создание заказа только один раз
+                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO services (service_type, cost, client_id, order_date, completion_date) VALUES (:service_type, :cost, :client_id, :order_date, :completion_date) RETURNING service_id", conn))
                         {
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("cost", DbType.Decimal) { Value = Convert.ToDecimal(txtServiceCost.Text) });
@@ -46,8 +71,19 @@ namespace Kursach_SUBD
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("order_date", DbType.Date) { Value = dateTimePickerOrderDate.Value });
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("completion_date", DbType.Date) { Value = dateTimePicker1.Value });
 
-                            insertServiceCommand.ExecuteNonQuery();
-                            MessageBox.Show("Контракт успешно добавлен.");
+                            int serviceId = Convert.ToInt32(insertServiceCommand.ExecuteScalar());
+
+                            // Привязка выбранных сотрудников к одному созданному заказу
+                            foreach (var item in checkedListBox1.CheckedItems)
+                            {
+                                int employeeId = (int)(item as dynamic).Value;
+                                var insertEmployeeCommand = new NpgsqlCommand("INSERT INTO service_employee (service_id, employee_id) VALUES (:service_id, :employee_id)", conn);
+                                insertEmployeeCommand.Parameters.AddWithValue("service_id", serviceId);
+                                insertEmployeeCommand.Parameters.AddWithValue("employee_id", employeeId);
+                                insertEmployeeCommand.ExecuteNonQuery();
+                            }
+
+                            MessageBox.Show("Контракт успешно добавлен с выбранными сотрудниками.");
                         }
                     }
                 }
