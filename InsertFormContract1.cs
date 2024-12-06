@@ -11,9 +11,9 @@ using System.Windows.Forms;
 
 namespace Kursach_SUBD
 {
-    public partial class InsertFormContract : Form
+    public partial class InsertFormContract1 : Form
     {
-        public InsertFormContract()
+        public InsertFormContract1()
         {
             InitializeComponent();
             LoadEmployees();
@@ -26,7 +26,7 @@ namespace Kursach_SUBD
                 try
                 {
                     conn.Open();
-                    string query = "SELECT employee_id, last_name || ' ' || first_name AS full_name FROM employees WHERE position = 'охранник';";
+                    string query = "SELECT employee_id, last_name || ' ' || first_name AS full_name FROM employees WHERE position = 'установщик оборудования';";
                     NpgsqlCommand command = new NpgsqlCommand(query, conn);
                     NpgsqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
@@ -55,7 +55,7 @@ namespace Kursach_SUBD
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("address", DbType.String) { Value = txtClientAddress.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("account_number", DbType.String) { Value = txtClientAccountNumber.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_last_name", DbType.String) { Value = txtClientRepresentative.Text });
-                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_first_name", DbType.String) { Value = textBox1.Text });
+                        insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_first_name", DbType.String) { Value = txtClientRepresentative.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("representative_middle_name", DbType.String) { Value = textBox2.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("phone_number", DbType.String) { Value = txtClientPhoneNumber.Text });
                         insertClientCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
@@ -63,7 +63,7 @@ namespace Kursach_SUBD
                         int clientId = Convert.ToInt32(insertClientCommand.ExecuteScalar());
 
                         // Создание заказа только один раз
-                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO s_services (service_type, cost, client_id, order_date, completion_date) VALUES (:service_type, :cost, :client_id, :order_date, :completion_date) RETURNING service_id", conn))
+                        using (var insertServiceCommand = new NpgsqlCommand("INSERT INTO m_services (service_type, cost, client_id, order_date, completion_date) VALUES (:service_type, :cost, :client_id, :order_date, :completion_date) RETURNING service_id", conn))
                         {
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("service_type", DbType.String) { Value = txtServiceType.Text });
                             insertServiceCommand.Parameters.Add(new NpgsqlParameter("cost", DbType.Decimal) { Value = Convert.ToDecimal(txtServiceCost.Text) });
@@ -77,7 +77,7 @@ namespace Kursach_SUBD
                             foreach (var item in checkedListBox1.CheckedItems)
                             {
                                 int employeeId = (int)(item as dynamic).Value;
-                                var insertEmployeeCommand = new NpgsqlCommand("INSERT INTO s_service_employee (service_id, employee_id) VALUES (:service_id, :employee_id)", conn);
+                                var insertEmployeeCommand = new NpgsqlCommand("INSERT INTO m_service_employee (service_id, employee_id) VALUES (:service_id, :employee_id)", conn);
                                 insertEmployeeCommand.Parameters.AddWithValue("service_id", serviceId);
                                 insertEmployeeCommand.Parameters.AddWithValue("employee_id", employeeId);
                                 insertEmployeeCommand.ExecuteNonQuery();
@@ -105,26 +105,6 @@ namespace Kursach_SUBD
             {
                 MessageBox.Show("Произошла неизвестная ошибка: " + ex.Message);
             }
-        }
-
-        private void label7_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void textBox4_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void InsertFormContract_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

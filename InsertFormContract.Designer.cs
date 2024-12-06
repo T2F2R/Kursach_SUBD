@@ -260,7 +260,7 @@
             this.Controls.Add(this.dateTimePickerOrderDate);
             this.Controls.Add(this.button1);
             this.Name = "InsertFormContract";
-            this.Text = "InsertFormContract";
+            this.Text = "Создание контракта";
             this.Load += new System.EventHandler(this.InsertFormContract_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
